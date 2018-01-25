@@ -64,17 +64,17 @@ module ActsAsDAG
       #   D
       #
 
-      has_many :ancestor_links,   lambda { where(options[:link_conditions]).where("ancestor_id != descendant_id").order("distance DESC") }, :class_name => descendant_class, :foreign_key => 'descendant_id'
-      has_many :descendant_links, lambda { where(options[:link_conditions]).where("descendant_id != ancestor_id").order("distance ASC") }, :class_name => descendant_class, :foreign_key => 'ancestor_id'
+      has_many :ancestor_links,   lambda { where(options[:link_conditions]).where("ancestor_id != descendant_id").order("distance DESC") }, :class_name => descendant_class.to_s, :foreign_key => 'descendant_id'
+      has_many :descendant_links, lambda { where(options[:link_conditions]).where("descendant_id != ancestor_id").order("distance ASC") }, :class_name => descendant_class.to_s, :foreign_key => 'ancestor_id'
 
       has_many :ancestors,        :through => :ancestor_links, :source => :ancestor
       has_many :descendants,      :through => :descendant_links, :source => :descendant
 
-      has_many :path_links,       lambda { where(options[:link_conditions]).order("distance DESC") }, :class_name => descendant_class, :foreign_key => 'descendant_id', :dependent => :delete_all
-      has_many :subtree_links,    lambda { where(options[:link_conditions]).order("distance ASC") }, :class_name => descendant_class, :foreign_key => 'ancestor_id', :dependent => :delete_all
+      has_many :path_links,       lambda { where(options[:link_conditions]).order("distance DESC") }, :class_name => descendant_class.to_s, :foreign_key => 'descendant_id', :dependent => :delete_all
+      has_many :subtree_links,    lambda { where(options[:link_conditions]).order("distance ASC") }, :class_name => descendant_class.to_s, :foreign_key => 'ancestor_id', :dependent => :delete_all
 
-      has_many :parent_links,     lambda { where options[:link_conditions] }, :class_name => link_class, :foreign_key => 'child_id', :dependent => :delete_all, :inverse_of => :child
-      has_many :child_links,      lambda { where options[:link_conditions] }, :class_name => link_class, :foreign_key => 'parent_id', :dependent => :delete_all, :inverse_of => :parent
+      has_many :parent_links,     lambda { where options[:link_conditions] }, :class_name => link_class.to_s, :foreign_key => 'child_id', :dependent => :delete_all, :inverse_of => :child
+      has_many :child_links,      lambda { where options[:link_conditions] }, :class_name => link_class.to_s, :foreign_key => 'parent_id', :dependent => :delete_all, :inverse_of => :parent
 
       has_many :parents,          :through => :parent_links, :source => :parent
       has_many :children,         :through => :child_links, :source => :child
