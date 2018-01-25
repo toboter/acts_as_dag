@@ -63,27 +63,28 @@ module ActsAsDAG
       #  \ /
       #   D
       #
-      has_many :ancestors,        :through => :ancestor_links, :source => :ancestor
-      has_many :descendants,      :through => :descendant_links, :source => :descendant
-
-      has_many :path,             :through => :path_links, :source => :ancestor
-      has_many :subtree,          :through => :subtree_links, :source => :descendant
 
       has_many :ancestor_links,   lambda { where(options[:link_conditions]).where("ancestor_id != descendant_id").order("distance DESC") }, :class_name => descendant_class, :foreign_key => 'descendant_id'
       has_many :descendant_links, lambda { where(options[:link_conditions]).where("descendant_id != ancestor_id").order("distance ASC") }, :class_name => descendant_class, :foreign_key => 'ancestor_id'
 
+      has_many :ancestors,        :through => :ancestor_links, :source => :ancestor
+      has_many :descendants,      :through => :descendant_links, :source => :descendant
+
       has_many :path_links,       lambda { where(options[:link_conditions]).order("distance DESC") }, :class_name => descendant_class, :foreign_key => 'descendant_id', :dependent => :delete_all
       has_many :subtree_links,    lambda { where(options[:link_conditions]).order("distance ASC") }, :class_name => descendant_class, :foreign_key => 'ancestor_id', :dependent => :delete_all
-
-      has_many :parents,          :through => :parent_links, :source => :parent
-      has_many :children,         :through => :child_links, :source => :child
 
       has_many :parent_links,     lambda { where options[:link_conditions] }, :class_name => link_class, :foreign_key => 'child_id', :dependent => :delete_all, :inverse_of => :child
       has_many :child_links,      lambda { where options[:link_conditions] }, :class_name => link_class, :foreign_key => 'parent_id', :dependent => :delete_all, :inverse_of => :parent
 
+      has_many :parents,          :through => :parent_links, :source => :parent
+      has_many :children,         :through => :child_links, :source => :child
+
+      has_many :path,             :through => :path_links, :source => :ancestor
+      has_many :subtree,          :through => :subtree_links, :source => :descendant
+
       # NOTE: Use select to prevent ActiveRecord::ReadOnlyRecord if the returned records are modified
       scope :roots,               lambda { joins(:parent_links).where(link_class.table_name => {:parent_id => nil}) }
-      scope :leaves,               lambda { joins("LEFT OUTER JOIN #{link_class.table_name} ON #{table_name}.id = parent_id").where(link_class.table_name => {:child_id => nil}).uniq }
+      scope :leaves,              lambda { joins("LEFT OUTER JOIN #{link_class.table_name} ON #{table_name}.id = parent_id").where(link_class.table_name => {:child_id => nil}).uniq }
       scope :children,            lambda { joins(:parent_links).where.not(link_class.table_name => {:parent_id => nil}).uniq }
       scope :parent_records,      lambda { joins(:child_links).where.not(link_class.table_name => {:child_id => nil}).uniq }
 
